@@ -42,3 +42,6 @@ next-env.d.ts
 
 # misc
 .DS_Store
+
+# test artifacts
+.playwright-mcp/

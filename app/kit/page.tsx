@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PointProcessHero from "@/components/quantlab/PointProcessHero";
 import Card from "@/components/ui/Card";
 import GlassPanel from "@/components/ui/GlassPanel";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -130,6 +131,16 @@ export default function Kit() {
               <span className="text-text-2">n 3,184</span>
             </p>
           </GlassPanel>
+        </div>
+      </Section>
+
+      <Section
+        tag="PointProcessHero"
+        title="Hawkes point process — mini tier"
+        note="The Phase 2 engine at homepage-card settings: 30Hz paths, no smear, no cursor layer. The sim pauses when scrolled out of view; reduced motion swaps in the static frame."
+      >
+        <div className="overflow-hidden rounded-card border border-border bg-bg-1 shadow-edge">
+          <PointProcessHero variant="mini" className="block h-64 w-full" />
         </div>
       </Section>
     </div>
