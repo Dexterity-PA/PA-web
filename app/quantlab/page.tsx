@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PointProcessHero from "@/components/quantlab/PointProcessHero";
 
 export const metadata: Metadata = {
   title: "QuantLab — Praneeth Annapureddy",
@@ -7,18 +8,20 @@ export const metadata: Metadata = {
 
 export default function QuantLab() {
   return (
-    <div className="mx-auto max-w-content px-6">
-      <section className="flex min-h-screen flex-col justify-center">
+    <>
+      <PointProcessHero variant="full" className="block h-svh w-full" />
+      <section id="model" className="mx-auto max-w-content px-6 section-pad">
         <p className="font-mono text-12 uppercase tracking-label text-text-3">
-          QuantLab
+          The model
         </p>
-        <h1 className="mt-6 text-50 font-semibold text-text-1">
-          Bivariate Hawkes modeling of BTC-USDT order flow
-        </h1>
-        <p className="mt-6 max-w-xl text-16 text-text-2">
-          Placeholder — the point-process hero lands in Phase 2.
+        <h2 className="mt-4 text-38 font-semibold text-text-1">
+          Self-excitation, made visible
+        </h2>
+        <p className="mt-4 max-w-xl text-16 text-text-2">
+          Placeholder — ModelSection, MathScroll, ResultsGrid, ValidationWall
+          and Thesis land in Phase 4.
         </p>
       </section>
-    </div>
+    </>
   );
 }
