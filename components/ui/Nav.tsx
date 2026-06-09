@@ -1,4 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
+import { useState } from "react";
+import { spring } from "@/lib/motion";
 
 const links = [
   { label: "QuantLab", href: "/quantlab" },
@@ -7,8 +12,25 @@ const links = [
 ];
 
 export default function Nav() {
+  const reduce = useReducedMotion();
+  const { scrollY } = useScroll();
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const prev = scrollY.getPrevious() ?? 0;
+    setScrolled(y > 8);
+    if (reduce) return;
+    setHidden(y > prev && y > 120);
+  });
+
   return (
-    <header className="fixed inset-x-0 top-0 z-40 h-14 bg-glass backdrop-blur-[20px]">
+    <motion.header
+      className="fixed inset-x-0 top-0 z-40 h-14 bg-glass backdrop-blur-[20px]"
+      initial={{ y: 0 }}
+      animate={{ y: hidden ? "-100%" : "0%" }}
+      transition={spring}
+    >
       <nav className="mx-auto flex h-full max-w-content items-center justify-between px-6">
         <Link
           href="/"
@@ -28,6 +50,13 @@ export default function Nav() {
           ))}
         </div>
       </nav>
-    </header>
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-border-hover"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: scrolled ? 1 : 0 }}
+        transition={spring}
+      />
+    </motion.header>
   );
 }
