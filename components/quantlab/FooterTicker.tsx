@@ -43,8 +43,16 @@ export default function FooterTicker() {
     let flush: ReturnType<typeof setInterval> | null = null;
 
     const stop = () => {
-      ws?.close();
+      const sock = ws;
       ws = null;
+      if (sock) {
+        sock.onmessage = null;
+        sock.onerror = null;
+        // Closing a still-CONNECTING socket logs a browser warning; let it open,
+        // then close cleanly (or let the failed connect tear itself down).
+        if (sock.readyState === WebSocket.CONNECTING) sock.onopen = () => sock.close();
+        else sock.close();
+      }
       if (flush) clearInterval(flush);
       flush = null;
     };

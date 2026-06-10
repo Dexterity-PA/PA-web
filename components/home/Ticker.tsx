@@ -61,7 +61,14 @@ export default function Ticker({ active = true, className = "" }: Props) {
     return () => {
       window.clearInterval(id);
       io.disconnect();
-      ws?.close();
+      const sock = ws;
+      if (sock) {
+        sock.onmessage = null;
+        // Closing a still-CONNECTING socket logs a browser warning; let it open,
+        // then close cleanly (or let the failed connect tear itself down).
+        if (sock.readyState === WebSocket.CONNECTING) sock.onopen = () => sock.close();
+        else sock.close();
+      }
     };
   }, [active]);
 

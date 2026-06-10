@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { RefObject } from "react";
 import {
   animate,
@@ -27,6 +27,11 @@ export const indexCount = { type: "spring", stiffness: 120, damping: 20 } as con
 export const wordStagger = 0.045;
 export const continuationDelay = 0.12;
 
+// Reduced-motion settle: snap to the end state with no animation. Variants below
+// take a `reduce` custom value so SSR always renders the static `hidden` state
+// (no hydration mismatch) while reduced-motion clients settle instantly post-mount.
+export const instant = { duration: 0 } as const;
+
 // Two-tone headline: lead group springs in per-word, continuation group
 // follows 120ms later. blur 6px → 0, y 14 → 0. springs only.
 export const sectionReveal: {
@@ -36,31 +41,36 @@ export const sectionReveal: {
   word: Variants;
 } = {
   container: { hidden: {}, show: {} },
-  lead: { hidden: {}, show: { transition: { staggerChildren: wordStagger } } },
+  lead: { hidden: {}, show: (r: boolean) => ({ transition: { staggerChildren: r ? 0 : wordStagger } }) },
   continuation: {
     hidden: {},
-    show: { transition: { delayChildren: continuationDelay, staggerChildren: wordStagger } },
+    show: (r: boolean) => ({
+      transition: { delayChildren: r ? 0 : continuationDelay, staggerChildren: r ? 0 : wordStagger },
+    }),
   },
   word: {
     hidden: { opacity: 0, y: 14, filter: "blur(6px)" },
-    show: { opacity: 1, y: 0, filter: "blur(0px)", transition: spring },
+    show: (r: boolean) => ({ opacity: 1, y: 0, filter: "blur(0px)", transition: r ? instant : spring }),
   },
 };
 
 // Figure frame fades in and staggers the stroke draw-ins of its children.
 export const figureFrame: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { ...spring, delayChildren: 0.05, staggerChildren: 0.08 } },
+  show: (r: boolean) => ({
+    opacity: 1,
+    transition: r ? instant : { ...spring, delayChildren: 0.05, staggerChildren: 0.08 },
+  }),
 };
 
 // SVG stroke draw-in (strokeDashoffset via pathLength) tied to viewport enter.
 export const figureDraw: Variants = {
   hidden: { pathLength: 0, opacity: 0 },
-  show: {
+  show: (r: boolean) => ({
     pathLength: 1,
     opacity: 1,
-    transition: { pathLength: springDraw, opacity: { duration: 0.2 } },
-  },
+    transition: r ? instant : { pathLength: springDraw, opacity: { duration: 0.2 } },
+  }),
 };
 
 export const formatIndex = (n: number) => n.toFixed(1);
@@ -83,7 +93,21 @@ export function useIndexCount(target: number, play: boolean, reduce: boolean): M
   return text;
 }
 
+// False on the server and the first client render, true thereafter — the SSR-safe
+// way to defer client-only state without a setState-in-effect cascade.
+const subscribeNoop = () => () => {};
+export function useHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+}
+
 // Subtle scroll-driven translateY for figures. Transform only, |y| ≤ distance/2.
+// Returns a flat 0 on the server and the first client render so the SSR transform
+// matches in both motion modes (no hydration mismatch); the drift attaches after
+// mount for motion users only. Figures sit below the fold, so the handoff is unseen.
 export function useParallaxDrift(
   ref: RefObject<HTMLElement | null>,
   distance = 40,
@@ -91,5 +115,6 @@ export function useParallaxDrift(
 ): MotionValue<number> | number {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], [distance / 2, -distance / 2]);
-  return reduce ? 0 : y;
+  const hydrated = useHydrated();
+  return reduce || !hydrated ? 0 : y;
 }

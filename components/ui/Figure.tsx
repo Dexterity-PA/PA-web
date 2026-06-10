@@ -26,7 +26,8 @@ export default function Figure({ index, caption, children, className = "", drift
       <motion.div
         style={{ y }}
         variants={figureFrame}
-        initial={reduce ? "show" : "hidden"}
+        custom={!!reduce}
+        initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
         className="relative overflow-hidden rounded-card border border-border bg-bg-1 shadow-edge"

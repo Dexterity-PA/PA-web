@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import Card from "@/components/ui/Card";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { figureDraw, spring } from "@/lib/motion";
+import { figureDraw, instant, spring } from "@/lib/motion";
 
 type Term = "mu" | "self" | "cross";
 
@@ -39,11 +39,11 @@ const paragraphs = [
 
 const termGroup = {
   hidden: {},
-  show: { transition: { delayChildren: 0.08, staggerChildren: 0.14 } },
+  show: (r: boolean) => ({ transition: { delayChildren: r ? 0 : 0.08, staggerChildren: r ? 0 : 0.14 } }),
 };
 const termRow = {
   hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
-  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: spring },
+  show: (r: boolean) => ({ opacity: 1, y: 0, filter: "blur(0px)", transition: r ? instant : spring }),
 };
 
 export default function ModelSection() {
@@ -68,7 +68,8 @@ export default function ModelSection() {
   const drawn = useInView(svgRef, { once: true, amount: 0.4 });
   const drawProps = {
     variants: figureDraw,
-    initial: reduce ? "show" : "hidden",
+    custom: !!reduce,
+    initial: "hidden",
     animate: reduce || drawn ? "show" : "hidden",
   } as const;
 
@@ -103,11 +104,12 @@ export default function ModelSection() {
               <motion.div
                 className="mt-6 select-none font-mono text-16 leading-loose text-text-2"
                 variants={termGroup}
-                initial={reduce ? "show" : "hidden"}
+                custom={!!reduce}
+                initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, amount: 0.6 }}
               >
-                <motion.div variants={termRow}>
+                <motion.div variants={termRow} custom={!!reduce}>
                   <span className="text-text-1">λ⁺(t)</span>
                   {" = "}
                   <motion.button
@@ -120,7 +122,7 @@ export default function ModelSection() {
                     μ⁺
                   </motion.button>
                 </motion.div>
-                <motion.div variants={termRow} className="mt-1 pl-6">
+                <motion.div variants={termRow} custom={!!reduce} className="mt-1 pl-6">
                   {"+ "}
                   <motion.button
                     type="button"
@@ -132,7 +134,7 @@ export default function ModelSection() {
                     Σ<sub>tⱼ∈N⁺</sub> α₊₊ e<sup>−β⁺(t−tⱼ)</sup>
                   </motion.button>
                 </motion.div>
-                <motion.div variants={termRow} className="mt-1 pl-6">
+                <motion.div variants={termRow} custom={!!reduce} className="mt-1 pl-6">
                   {"+ "}
                   <motion.button
                     type="button"

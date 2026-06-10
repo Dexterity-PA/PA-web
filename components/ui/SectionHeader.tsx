@@ -16,11 +16,11 @@ type Props = {
 
 const words = (s: string) => s.trim().split(/\s+/);
 
-function Words({ text }: { text: string }) {
+function Words({ text, reduce }: { text: string; reduce: boolean }) {
   const parts = words(text);
   return parts.map((w, i) => (
     <Fragment key={i}>
-      <motion.span variants={sectionReveal.word} className="inline-block">
+      <motion.span variants={sectionReveal.word} custom={reduce} className="inline-block">
         {w}
       </motion.span>
       {i < parts.length - 1 ? " " : null}
@@ -46,15 +46,16 @@ export default function SectionHeader({
     <header ref={ref} className={`grid gap-x-8 gap-y-10 md:grid-cols-12 ${className}`}>
       <motion.h2
         variants={sectionReveal.container}
-        initial={reduce ? "show" : "hidden"}
+        custom={!!reduce}
+        initial="hidden"
         animate={reduce || inView ? "show" : "hidden"}
         className="two-tone order-2 text-balance text-38 md:order-none md:col-span-7 md:text-50"
       >
-        <motion.span variants={sectionReveal.lead} className="lead">
-          <Words text={lead} />
+        <motion.span variants={sectionReveal.lead} custom={!!reduce} className="lead">
+          <Words text={lead} reduce={!!reduce} />
         </motion.span>{" "}
-        <motion.span variants={sectionReveal.continuation}>
-          <Words text={rest} />
+        <motion.span variants={sectionReveal.continuation} custom={!!reduce}>
+          <Words text={rest} reduce={!!reduce} />
         </motion.span>
       </motion.h2>
 
