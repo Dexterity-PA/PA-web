@@ -38,20 +38,20 @@ export default function StaticPointProcess({ className = "" }: Props) {
       <style>{`@keyframes ppfade{from{opacity:0}}.ppfade{animation:ppfade .9s ease-out both}@media (prefers-reduced-motion:reduce){.ppfade{animation:none}}`}</style>
       <g className="ppfade">
         <rect x="0" y={AX - 0.5} width={W} height="1" fill="rgba(255,255,255,0.08)" />
-        <polygon points={buyArea} fill="rgba(74,222,128,0.08)" />
-        <polygon points={sellArea} fill="rgba(248,113,113,0.08)" />
+        <polygon points={buyArea} fill="rgba(74,222,128,0.07)" />
+        <polygon points={sellArea} fill="rgba(248,113,113,0.07)" />
         <polyline
           points={buyPts}
           fill="none"
           stroke="#4ade80"
-          strokeWidth="1.5"
+          strokeWidth="1.25"
           vectorEffect="non-scaling-stroke"
         />
         <polyline
           points={sellPts}
           fill="none"
           stroke="#f87171"
-          strokeWidth="1.5"
+          strokeWidth="1.25"
           vectorEffect="non-scaling-stroke"
         />
         {baked.events.map((ev, i) => (

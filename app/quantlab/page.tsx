@@ -7,6 +7,7 @@ import ResultsGrid from "@/components/quantlab/ResultsGrid";
 import ValidationWall from "@/components/quantlab/ValidationWall";
 import Thesis from "@/components/quantlab/Thesis";
 import Footer from "@/components/quantlab/Footer";
+import SectionRule from "@/components/ui/SectionRule";
 
 const description =
   "Bivariate Hawkes modeling of BTC-USDT market-order flow. Fitted branching ratio 0.62, with the validation and the limits in plain sight.";
@@ -27,6 +28,14 @@ export const metadata: Metadata = {
   },
 };
 
+function Divider() {
+  return (
+    <div className="mx-auto max-w-content px-6">
+      <SectionRule />
+    </div>
+  );
+}
+
 export default function QuantLab() {
   return (
     <>
@@ -37,10 +46,15 @@ export default function QuantLab() {
         <PointProcessHero variant="full" className="absolute inset-0" />
         <HeroOverlay />
       </section>
+      <Divider />
       <ModelSection />
+      <Divider />
       <MathScroll />
+      <Divider />
       <ResultsGrid />
+      <Divider />
       <ValidationWall />
+      <Divider />
       <Thesis />
       <Footer />
     </>

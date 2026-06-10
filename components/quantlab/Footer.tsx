@@ -10,6 +10,14 @@ const links = [
 export default function Footer() {
   return (
     <footer className="border-t border-border">
+      <div className="mx-auto flex max-w-content items-baseline gap-3 px-6 pb-3 pt-8">
+        <span className="font-mono text-12 uppercase tracking-label text-accent/80 tabular-nums">
+          0.6
+        </span>
+        <span className="font-mono text-12 uppercase tracking-label text-text-3">
+          Live tape · BTC-USDT aggTrades
+        </span>
+      </div>
       <FooterTicker />
       <div className="mx-auto flex max-w-content flex-wrap items-center justify-between gap-4 px-6 py-8">
         <p className="font-mono text-12 uppercase tracking-label text-text-3">

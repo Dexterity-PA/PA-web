@@ -1,10 +1,11 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import Card from "@/components/ui/Card";
 import Reveal from "@/components/ui/Reveal";
-import { spring } from "@/lib/motion";
+import SectionHeader from "@/components/ui/SectionHeader";
+import { figureDraw, spring } from "@/lib/motion";
 
 type Term = "mu" | "self" | "cross";
 
@@ -36,15 +37,21 @@ const paragraphs = [
   "The bivariate structure is the point. Buys excite sells and sells excite buys. Market makers lean against flow, mean-reversion strategies fade it. The cross-excitation terms measure that coupling directly, and their asymmetry between sides is where the microstructure signal lives.",
 ];
 
+const termGroup = {
+  hidden: {},
+  show: { transition: { delayChildren: 0.08, staggerChildren: 0.14 } },
+};
+const termRow = {
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
+  show: { opacity: 1, y: 0, filter: "blur(0px)", transition: spring },
+};
+
 export default function ModelSection() {
+  const reduce = useReducedMotion();
   const [term, setTerm] = useState<Term | null>(null);
 
-  const eq = (t: Term) => ({
-    opacity: term && term !== t ? 0.35 : 1,
-  });
-  const viz = (t: Term) => ({
-    opacity: term ? (term === t ? 1 : 0.18) : 0.7,
-  });
+  const eq = (t: Term) => ({ opacity: term && term !== t ? 0.35 : 1 });
+  const viz = (t: Term) => ({ opacity: term ? (term === t ? 1 : 0.18) : 0.7 });
 
   const termProps = (t: Term) => ({
     onPointerEnter: () => setTerm(t),
@@ -53,32 +60,48 @@ export default function ModelSection() {
     onBlur: () => setTerm(null),
   });
 
+  const drawProps = {
+    variants: figureDraw,
+    initial: reduce ? "show" : "hidden",
+    whileInView: "show",
+    viewport: { once: true, amount: 0.5 },
+  } as const;
+
   return (
     <section id="model" className="mx-auto max-w-content px-6 section-pad">
-      <div className="grid gap-16 md:grid-cols-2">
+      <SectionHeader
+        index={0.1}
+        lead="Self-excitation,"
+        rest="made visible."
+        support="A bivariate Hawkes process whose intensity is a function of its own history, fit to BTC-USDT market orders."
+        href="#math"
+        linkLabel="Jump to the math"
+      />
+
+      <div className="mt-16 grid gap-16 md:mt-24 md:grid-cols-2">
         <div>
-          <Reveal>
-            <p className="font-mono text-12 uppercase tracking-label text-text-3">
-              The model
-            </p>
-            <h2 className="mt-4 text-38 font-semibold text-text-1">
-              Self-excitation, made visible
-            </h2>
-          </Reveal>
           {paragraphs.map((p, i) => (
-            <Reveal key={i} index={i + 1}>
-              <p className="mt-6 text-16 text-text-2">{p}</p>
+            <Reveal key={i} index={i}>
+              <p className={i === 0 ? "text-16 text-text-2" : "mt-6 text-16 text-text-2"}>{p}</p>
             </Reveal>
           ))}
         </div>
+
         <div className="relative">
           <Reveal className="md:sticky md:top-28">
             <Card tiltMax={3} className="p-8">
               <p className="font-mono text-12 uppercase tracking-label text-text-3">
                 Conditional intensity · buy side
               </p>
-              <div className="mt-6 select-none font-mono text-16 leading-loose text-text-2">
-                <div>
+
+              <motion.div
+                className="mt-6 select-none font-mono text-16 leading-loose text-text-2"
+                variants={termGroup}
+                initial={reduce ? "show" : "hidden"}
+                whileInView="show"
+                viewport={{ once: true, amount: 0.6 }}
+              >
+                <motion.div variants={termRow}>
                   <span className="text-text-1">λ⁺(t)</span>
                   {" = "}
                   <motion.button
@@ -90,8 +113,8 @@ export default function ModelSection() {
                   >
                     μ⁺
                   </motion.button>
-                </div>
-                <div className="mt-1 pl-6">
+                </motion.div>
+                <motion.div variants={termRow} className="mt-1 pl-6">
                   {"+ "}
                   <motion.button
                     type="button"
@@ -102,8 +125,8 @@ export default function ModelSection() {
                   >
                     Σ<sub>tⱼ∈N⁺</sub> α₊₊ e<sup>−β⁺(t−tⱼ)</sup>
                   </motion.button>
-                </div>
-                <div className="mt-1 pl-6">
+                </motion.div>
+                <motion.div variants={termRow} className="mt-1 pl-6">
                   {"+ "}
                   <motion.button
                     type="button"
@@ -114,20 +137,19 @@ export default function ModelSection() {
                   >
                     Σ<sub>tₖ∈N⁻</sub> α₊₋ e<sup>−β⁻(t−tₖ)</sup>
                   </motion.button>
-                </div>
+                </motion.div>
+              </motion.div>
+
+              <div className="mt-8 flex items-baseline gap-3">
+                <span className="fig-label">FIG 0.1</span>
+                <span className="text-12 text-text-3">kernel geometry</span>
               </div>
               <svg
                 viewBox="0 0 320 132"
-                className="mt-8 w-full"
+                className="mt-4 w-full"
                 aria-label="Diagram of baseline, self-excitation kernel, and cross-excitation"
               >
-                <line
-                  x1="16"
-                  y1={BASE_Y}
-                  x2="304"
-                  y2={BASE_Y}
-                  stroke="rgba(255,255,255,0.12)"
-                />
+                <line x1="16" y1={BASE_Y} x2="304" y2={BASE_Y} stroke="rgba(255,255,255,0.12)" />
                 <motion.g animate={viz("mu")} transition={spring}>
                   <rect
                     x="16"
@@ -144,12 +166,7 @@ export default function ModelSection() {
                     stroke="rgba(242,243,244,0.5)"
                     strokeDasharray="3 5"
                   />
-                  <text
-                    x="22"
-                    y={MU_Y - 6}
-                    className="fill-text-3 font-mono"
-                    fontSize="9"
-                  >
+                  <text x="22" y={MU_Y - 6} className="fill-text-3 font-mono" fontSize="9">
                     μ⁺
                   </text>
                 </motion.g>
@@ -162,11 +179,12 @@ export default function ModelSection() {
                     stroke="var(--accent)"
                     strokeWidth="2"
                   />
-                  <path
+                  <motion.path
                     d={LAMBDA_D}
                     fill="none"
                     stroke="var(--accent)"
                     strokeWidth="1.5"
+                    {...drawProps}
                   />
                 </motion.g>
                 <motion.g animate={viz("cross")} transition={spring}>
@@ -178,12 +196,12 @@ export default function ModelSection() {
                     stroke="var(--sell)"
                     strokeWidth="2"
                   />
-                  <path
+                  <motion.path
                     d="M165,112 C150,84 152,68 163,58"
                     fill="none"
                     stroke="var(--sell)"
                     strokeWidth="1.25"
-                    strokeDasharray="4 4"
+                    {...drawProps}
                   />
                   <path
                     d="M163,58 l-5,1.5 M163,58 l-1,5.2"
@@ -193,12 +211,13 @@ export default function ModelSection() {
                   />
                 </motion.g>
               </svg>
+
               <p className="mt-4 h-5 font-mono text-12 uppercase tracking-label text-text-3">
                 {term ? captions[term] : "hover a term"}
               </p>
               <p className="mt-6 border-t border-border pt-4 font-mono text-12 text-text-3">
-                λ⁻(t) mirrors with μ⁻, α₋₋, α₋₊. β is source-only: every buy
-                decays at β⁺, every sell at β⁻.
+                λ⁻(t) mirrors with μ⁻, α₋₋, α₋₊. β is source-only: every buy decays at β⁺, every
+                sell at β⁻.
               </p>
             </Card>
           </Reveal>

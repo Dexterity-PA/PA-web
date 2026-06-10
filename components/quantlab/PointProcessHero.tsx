@@ -20,8 +20,8 @@ const SMEAR = "rgba(5,6,7,0.12)";
 const AXIS = "rgba(255,255,255,0.08)";
 const BUY = "#4ade80";
 const SELL = "#f87171";
-const BUY_FILL = "rgba(74,222,128,0.08)";
-const SELL_FILL = "rgba(248,113,113,0.08)";
+const BUY_FILL = "rgba(74,222,128,0.07)";
+const SELL_FILL = "rgba(248,113,113,0.07)";
 const BUY_FILL_SMEAR = "rgba(74,222,128,0.012)";
 const SELL_FILL_SMEAR = "rgba(248,113,113,0.012)";
 
@@ -307,7 +307,7 @@ export default function PointProcessHero({ variant = "full", className = "" }: P
         if (i === k0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.25;
       ctx.strokeStyle = line;
       ctx.stroke();
     };
