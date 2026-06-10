@@ -6,8 +6,9 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import Reveal from "@/components/ui/Reveal";
 
 export const metadata: Metadata = {
-  title: "UI Kit — Praneeth Annapureddy",
-  description: "Phase 1 component gallery.",
+  title: "UI Kit",
+  description: "Component gallery for the site's motion primitives.",
+  robots: { index: false },
 };
 
 const label = "font-mono text-12 uppercase tracking-label text-text-3";
@@ -45,7 +46,7 @@ export default function Kit() {
         </h1>
         <p className="mt-4 max-w-xl text-16 text-text-2">
           The motion primitives behind the site. Every interaction is spring
-          physics — no fixed-duration easing. Tab through to see the designed
+          physics, no fixed-duration easing. Tab through to see the designed
           focus states.
         </p>
       </Reveal>
@@ -89,8 +90,8 @@ export default function Kit() {
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { t: "Branching ratio", v: "0.63", c: "Self-excitation strength of the fitted kernel." },
-            { t: "Kernel half-life", v: "1.8s", c: "Decay of one event's intensity contribution." },
+            { t: "Branching ratio", v: "0.62", c: "Self-excitation strength of the fitted kernel." },
+            { t: "Kernel half-life", v: "1.3s", c: "Decay of one event's intensity contribution." },
           ].map((d) => (
             <Card key={d.t} className="p-6">
               <p className={label}>{d.t}</p>
@@ -100,7 +101,7 @@ export default function Kit() {
           ))}
           <Card interactive={false} className="p-6">
             <p className={label}>Static</p>
-            <p className="mt-4 font-mono text-38 text-text-1">—</p>
+            <p className="mt-4 font-mono text-38 text-text-1">0.62</p>
             <p className="mt-3 text-16 text-text-2">
               interactive=false: the resting surface, no tilt or glow.
             </p>
@@ -111,7 +112,7 @@ export default function Kit() {
       <Section
         tag="GlassPanel"
         title="Glass over moving content"
-        note="Backdrop blur reads only over real, moving content — here, drifting gradient blobs."
+        note="Backdrop blur reads only over real, moving content. Here, drifting gradient blobs."
       >
         <div className="relative h-72 overflow-hidden rounded-card border border-border bg-bg-1">
           <div
@@ -136,11 +137,11 @@ export default function Kit() {
 
       <Section
         tag="PointProcessHero"
-        title="Hawkes point process — mini tier"
+        title="Hawkes point process, mini tier"
         note="The Phase 2 engine at homepage-card settings: 30Hz paths, no smear, no cursor layer. The sim pauses when scrolled out of view; reduced motion swaps in the static frame."
       >
         <div className="overflow-hidden rounded-card border border-border bg-bg-1 shadow-edge">
-          <PointProcessHero variant="mini" className="block h-64 w-full" />
+          <PointProcessHero variant="mini" className="relative block h-64 w-full" />
         </div>
       </Section>
     </div>
