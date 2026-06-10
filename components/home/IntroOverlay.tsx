@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { Fragment, useEffect, useState } from "react";
 import { spring } from "@/lib/motion";
+import { onReveal } from "./introBus";
 import PendingMark from "./PendingMark";
 import {
   HERO_LABEL,
@@ -59,32 +60,40 @@ export default function IntroOverlay() {
       at(0, () => setPhase(DONE));
       return () => timers.forEach(clearTimeout);
     }
-    sessionStorage.setItem("intro-seen", "1");
 
-    let clock = 0;
-    HERO_WORDS.forEach((w, li) => {
-      at(clock, () => {
-        setLine(li);
-        setChars(0);
+    // Hold at the resting first frame until the curtain begins to clear, then
+    // type. onReveal fires immediately if the curtain has already parted.
+    const begin = () => {
+      sessionStorage.setItem("intro-seen", "1");
+      let clock = 0;
+      HERO_WORDS.forEach((w, li) => {
+        at(clock, () => {
+          setLine(li);
+          setChars(0);
+        });
+        for (let c = 1; c <= w.length; c++) {
+          clock += CH + (Math.random() * 2 - 1) * JITTER;
+          const cc = c;
+          at(clock, () => setChars(cc));
+        }
+        clock += PAUSE;
       });
-      for (let c = 1; c <= w.length; c++) {
-        clock += CH + (Math.random() * 2 - 1) * JITTER;
-        const cc = c;
-        at(clock, () => setChars(cc));
-      }
-      clock += PAUSE;
-    });
-    at(clock, () => setPhase(BEAT));
-    clock += 400;
-    at(clock, () => setPhase(STRIKE));
-    clock += 480;
-    at(clock, () => setPhase(REST));
-    clock += 560;
-    at(clock, () => setPhase(FADE));
-    clock += 560;
-    at(clock, () => setPhase(DONE));
+      at(clock, () => setPhase(BEAT));
+      clock += 400;
+      at(clock, () => setPhase(STRIKE));
+      clock += 480;
+      at(clock, () => setPhase(REST));
+      clock += 560;
+      at(clock, () => setPhase(FADE));
+      clock += 560;
+      at(clock, () => setPhase(DONE));
+    };
 
-    return () => timers.forEach(clearTimeout);
+    const unsub = onReveal(begin);
+    return () => {
+      unsub();
+      timers.forEach(clearTimeout);
+    };
   }, [reduce]);
 
   if (phase === DONE) return null;

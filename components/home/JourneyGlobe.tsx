@@ -19,7 +19,7 @@ import {
   WebGLRenderer,
 } from "three";
 import { latLonToUnit, stops } from "./journeyData";
-import { coastline } from "./journeyCoastline";
+import { R, graticuleGeometry, coastlineGeometry } from "./globe/geometry";
 import {
   activeIndex,
   arcActive,
@@ -30,7 +30,6 @@ import {
   markerScale,
 } from "./journeyTimeline";
 
-const R = 1;
 const FOV = 38;
 const FAR = 3.6;
 const FIT_RADIUS = 1.15;
@@ -52,41 +51,6 @@ function slerpUnit(a: Vector3, b: Vector3, t: number, out: Vector3): Vector3 {
   const s0 = Math.sin((1 - t) * omega) / so;
   const s1 = Math.sin(t * omega) / so;
   return out.set(a.x * s0 + b.x * s1, a.y * s0 + b.y * s1, a.z * s0 + b.z * s1);
-}
-
-function graticuleGeometry(): BufferGeometry {
-  const p: number[] = [];
-  const push = (lat: number, lon: number) => {
-    const u = latLonToUnit(lat, lon);
-    p.push(u[0] * R, u[1] * R, u[2] * R);
-  };
-  for (let lat = -75; lat <= 75; lat += 15)
-    for (let lon = -180; lon < 180; lon += 6) {
-      push(lat, lon);
-      push(lat, lon + 6);
-    }
-  for (let lon = -180; lon < 180; lon += 15)
-    for (let lat = -84; lat < 84; lat += 6) {
-      push(lat, lon);
-      push(lat + 6, lon);
-    }
-  const g = new BufferGeometry();
-  g.setAttribute("position", new Float32BufferAttribute(p, 3));
-  return g;
-}
-
-function coastlineGeometry(): BufferGeometry {
-  const p: number[] = [];
-  for (const line of coastline)
-    for (let k = 0; k < line.length - 1; k++) {
-      const a = latLonToUnit(line[k][1], line[k][0]);
-      const b = latLonToUnit(line[k + 1][1], line[k + 1][0]);
-      const r = R * 1.001;
-      p.push(a[0] * r, a[1] * r, a[2] * r, b[0] * r, b[1] * r, b[2] * r);
-    }
-  const g = new BufferGeometry();
-  g.setAttribute("position", new Float32BufferAttribute(p, 3));
-  return g;
 }
 
 function arcGeometry(a: Vector3, b: Vector3): BufferGeometry {
