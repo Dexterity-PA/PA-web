@@ -1,6 +1,6 @@
 import AboutSection from "@/components/home/AboutSection";
 import FeaturedQuantlab from "@/components/home/FeaturedQuantlab";
-import IntroSequence from "@/components/home/IntroSequence";
+import HomeHero from "@/components/home/HomeHero";
 import Ticker from "@/components/home/Ticker";
 import SectionHeader from "@/components/ui/SectionHeader";
 import SectionRule from "@/components/ui/SectionRule";
@@ -8,7 +8,7 @@ import SectionRule from "@/components/ui/SectionRule";
 export default function Home() {
   return (
     <>
-      <IntroSequence />
+      <HomeHero />
 
       <div className="mx-auto max-w-content px-6">
         <SectionRule />

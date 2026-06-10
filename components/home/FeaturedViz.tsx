@@ -15,8 +15,9 @@ import type { BatchMsg } from "@/lib/hawkes/worker";
 type Props = { className?: string };
 
 const BG = "#050607";
-const SMEAR = "rgba(5,6,7,0.10)";
 const AXIS = "rgba(255,255,255,0.06)";
+const EDGE_MASK =
+  "linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%)";
 const BUY = "#4ade80";
 const SELL = "#f87171";
 const BUY_FILL = "rgba(74,222,128,0.07)";
@@ -255,7 +256,7 @@ export default function FeaturedViz({ className = "" }: Props) {
       while (evDrawTail < evHead && evT[evDrawTail & EV_MASK] < t0 - 1)
         evDrawTail += 1;
       integrate();
-      ctx.fillStyle = SMEAR;
+      ctx.fillStyle = BG;
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = AXIS;
       ctx.fillRect(0, axisY - 0.5, w, 1);
@@ -310,6 +311,7 @@ export default function FeaturedViz({ className = "" }: Props) {
         className="absolute inset-0 h-full w-full"
         viewBox={`0 0 ${VW} ${VH}`}
         preserveAspectRatio="none"
+        style={{ maskImage: EDGE_MASK, WebkitMaskImage: EDGE_MASK }}
       >
         <path d={STATIC_B} fill={BUY_FILL} />
         <path d={STATIC_S} fill={SELL_FILL} />
@@ -339,7 +341,11 @@ export default function FeaturedViz({ className = "" }: Props) {
         ))}
       </svg>
       {live && (
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full"
+          style={{ maskImage: EDGE_MASK, WebkitMaskImage: EDGE_MASK }}
+        />
       )}
     </div>
   );
