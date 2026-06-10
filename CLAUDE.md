@@ -26,6 +26,7 @@ Personal site, QuantLab flagship feature. Award-tier craft. Specs in /specs are 
 
 - middleware → proxy.ts
 - Route handlers needing Node APIs: runtime 'nodejs'
+- Motion v12: `custom` does not propagate to nested children; set it on every animating leaf.
 
 ## Code style
 
