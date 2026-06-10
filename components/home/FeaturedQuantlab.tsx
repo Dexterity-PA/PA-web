@@ -13,7 +13,7 @@ export default function FeaturedQuantlab() {
   const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={reduce ? { opacity: 1 } : { opacity: 0, y: 28, scale: 0.985 }}
+      initial={{ opacity: 0, y: 28, scale: 0.985 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={reduce ? { duration: 0 } : spring}

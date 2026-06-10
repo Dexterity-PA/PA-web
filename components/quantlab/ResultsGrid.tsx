@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import Card from "@/components/ui/Card";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { figureDraw } from "@/lib/motion";
+import { figureDraw, instant } from "@/lib/motion";
 
 const AMBER = "#fbbf24";
 const MONO = "var(--font-geist-mono)";
@@ -41,7 +41,10 @@ const acf = (() => {
 // Stroke-by-stroke draw container; figureDraw children animate pathLength.
 const chartFrame = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { delayChildren: 0.05, staggerChildren: 0.03 } },
+  show: (r: boolean) => ({
+    opacity: 1,
+    transition: r ? instant : { delayChildren: 0.05, staggerChildren: 0.03 },
+  }),
 };
 
 function DrawSvg({ reduce, children }: { reduce: boolean; children: ReactNode }) {
@@ -50,7 +53,8 @@ function DrawSvg({ reduce, children }: { reduce: boolean; children: ReactNode })
       viewBox="0 0 320 180"
       className="w-full"
       variants={chartFrame}
-      initial={reduce ? "show" : "hidden"}
+      custom={reduce}
+      initial="hidden"
       whileInView="show"
       viewport={{ once: true, amount: 0.5 }}
     >
@@ -59,7 +63,7 @@ function DrawSvg({ reduce, children }: { reduce: boolean; children: ReactNode })
   );
 }
 
-const HoldoutContent = (
+const HoldoutContent = (reduce: boolean) => (
   <>
     <line x1="20" y1="158" x2="304" y2="158" stroke="rgba(255,255,255,0.12)" />
     <line
@@ -81,7 +85,7 @@ const HoldoutContent = (
       return (
         <motion.path
           key={i}
-          variants={figureDraw}
+          variants={figureDraw} custom={reduce}
           d={`M${x},158 L${x},${y}`}
           stroke="var(--accent)"
           strokeWidth="4"
@@ -91,13 +95,13 @@ const HoldoutContent = (
   </>
 );
 
-const BranchingContent = (
+const BranchingContent = (reduce: boolean) => (
   <>
     <text x="22" y="60" fontSize="9" fill="var(--text-3)" fontFamily={MONO}>
       constant μ
     </text>
-    <motion.path variants={figureDraw} d="M22,80 L226.6,80" stroke="var(--accent)" strokeWidth="14" />
-    <motion.path variants={figureDraw} d="M226.6,80 L262.9,80" stroke={AMBER} strokeWidth="14" />
+    <motion.path variants={figureDraw} custom={reduce} d="M22,80 L226.6,80" stroke="var(--accent)" strokeWidth="14" />
+    <motion.path variants={figureDraw} custom={reduce} d="M226.6,80 L262.9,80" stroke={AMBER} strokeWidth="14" />
     <text x="270" y="84" fontSize="10" fill="var(--text-2)" fontFamily={MONO}>
       0.73
     </text>
@@ -107,26 +111,26 @@ const BranchingContent = (
     <text x="22" y="116" fontSize="9" fill="var(--text-3)" fontFamily={MONO}>
       piecewise μ · 12×300s
     </text>
-    <motion.path variants={figureDraw} d="M22,130 L226.6,130" stroke="var(--accent)" strokeWidth="14" />
+    <motion.path variants={figureDraw} custom={reduce} d="M22,130 L226.6,130" stroke="var(--accent)" strokeWidth="14" />
     <text x="232" y="134" fontSize="10" fill="var(--accent)" fontFamily={MONO}>
       0.62
     </text>
   </>
 );
 
-const CrossContent = (
+const CrossContent = (reduce: boolean) => (
   <>
     <text x="24" y="52" fontSize="9" fill="var(--text-3)" fontFamily={MONO}>
       buy → sell
     </text>
-    <motion.path variants={figureDraw} d="M24,66 L242.5,66" stroke="var(--accent)" strokeWidth="12" />
+    <motion.path variants={figureDraw} custom={reduce} d="M24,66 L242.5,66" stroke="var(--accent)" strokeWidth="12" />
     <text x="248" y="70" fontSize="10" fill="var(--text-2)" fontFamily={MONO}>
       Φ 0.038
     </text>
     <text x="24" y="104" fontSize="9" fill="var(--text-3)" fontFamily={MONO}>
       sell → buy
     </text>
-    <motion.path variants={figureDraw} d="M24,118 L139,118" stroke="var(--sell)" strokeWidth="12" />
+    <motion.path variants={figureDraw} custom={reduce} d="M24,118 L139,118" stroke="var(--sell)" strokeWidth="12" />
     <text x="145" y="122" fontSize="10" fill="var(--text-2)" fontFamily={MONO}>
       Φ 0.020
     </text>
@@ -136,7 +140,7 @@ const CrossContent = (
   </>
 );
 
-const FitContent = (
+const FitContent = (reduce: boolean) => (
   <>
     <line x1="24" y1="138" x2="304" y2="138" stroke="rgba(255,255,255,0.1)" strokeDasharray="3 4" />
     <line x1="24" y1="162" x2="304" y2="162" stroke="rgba(255,255,255,0.1)" strokeDasharray="3 4" />
@@ -150,7 +154,7 @@ const FitContent = (
       return (
         <motion.path
           key={i}
-          variants={figureDraw}
+          variants={figureDraw} custom={reduce}
           d={`M${x},150 L${x},${y}`}
           stroke={i === 0 ? AMBER : "var(--text-3)"}
           strokeWidth="6"
@@ -167,7 +171,7 @@ type Result = {
   label: string;
   stat: string;
   caption: string;
-  chart: ReactNode;
+  chart: (reduce: boolean) => ReactNode;
   amber?: boolean;
 };
 
@@ -258,7 +262,7 @@ export default function ResultsGrid() {
                 <span className="fig-label">FIG 0.3{i + 1}</span>
               </div>
               <div className="mt-6">
-                <DrawSvg reduce={reduce}>{r.chart}</DrawSvg>
+                <DrawSvg reduce={reduce}>{r.chart(reduce)}</DrawSvg>
               </div>
               <p
                 className="mt-6 font-mono text-21"

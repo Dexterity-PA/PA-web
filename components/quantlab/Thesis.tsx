@@ -2,7 +2,7 @@
 
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { Fragment, useMemo, useRef } from "react";
-import { sectionReveal, spring, springSnappy, useIndexCount, wordStagger } from "@/lib/motion";
+import { instant, sectionReveal, spring, springSnappy, useIndexCount, wordStagger } from "@/lib/motion";
 
 // Manifesto, roadmap, and copy are carried verbatim from Phase 5.
 const HEADING = "A good model, and its limits";
@@ -27,23 +27,23 @@ const DONE_THROUGH = phases.length - 1; // all phases 00–07 complete
 
 const headlineGroup = {
   hidden: {},
-  show: { transition: { delayChildren: 0.05, staggerChildren: wordStagger } },
+  show: (r: boolean) => ({ transition: { delayChildren: r ? 0 : 0.05, staggerChildren: r ? 0 : wordStagger } }),
 };
 const lineGroup = {
   hidden: {},
-  show: { transition: { delayChildren: 0.05, staggerChildren: 0.08 } },
+  show: (r: boolean) => ({ transition: { delayChildren: r ? 0 : 0.05, staggerChildren: r ? 0 : 0.08 } }),
 };
 const lineItem = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: spring },
+  show: (r: boolean) => ({ opacity: 1, transition: r ? instant : spring }),
 };
 const nodeGroup = {
   hidden: {},
-  show: { transition: { delayChildren: 0.1, staggerChildren: 0.08 } },
+  show: (r: boolean) => ({ transition: { delayChildren: r ? 0 : 0.1, staggerChildren: r ? 0 : 0.08 } }),
 };
 const nodeItem = {
   hidden: { opacity: 0, scale: 0.5, y: 6 },
-  show: { opacity: 1, scale: 1, y: 0, transition: springSnappy },
+  show: (r: boolean) => ({ opacity: 1, scale: 1, y: 0, transition: r ? instant : springSnappy }),
 };
 
 function Lines({ text, className, reduce }: { text: string; className: string; reduce: boolean }) {
@@ -52,12 +52,13 @@ function Lines({ text, className, reduce }: { text: string; className: string; r
     <motion.p
       className={className}
       variants={lineGroup}
-      initial={reduce ? "show" : "hidden"}
+      custom={reduce}
+      initial="hidden"
       whileInView="show"
       viewport={{ once: true, amount: 0.3 }}
     >
       {lines.map((ln, i) => (
-        <motion.span key={i} variants={lineItem}>
+        <motion.span key={i} variants={lineItem} custom={reduce}>
           {ln}
           {i < lines.length - 1 ? " " : null}
         </motion.span>
@@ -77,21 +78,22 @@ export default function Thesis() {
       <div ref={headRef} className="mx-auto max-w-2xl text-center">
         <motion.p
           className="font-mono text-12 uppercase tracking-label text-text-3"
-          initial={reduce ? { opacity: 1 } : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={reduce || inView ? { opacity: 1 } : { opacity: 0 }}
-          transition={spring}
+          transition={reduce ? instant : spring}
         >
           <motion.span className="tabular-nums text-accent">{idx}</motion.span> · Thesis
         </motion.p>
         <motion.h2
           className="two-tone mt-4 text-center text-38 md:text-50"
           variants={headlineGroup}
-          initial={reduce ? "show" : "hidden"}
+          custom={reduce}
+          initial="hidden"
           animate={reduce || inView ? "show" : "hidden"}
         >
           {HEADING.split(" ").map((w, i, a) => (
             <Fragment key={i}>
-              <motion.span variants={sectionReveal.word} className="lead inline-block">
+              <motion.span variants={sectionReveal.word} custom={reduce} className="lead inline-block">
                 {w}
               </motion.span>
               {i < a.length - 1 ? " " : null}
@@ -114,7 +116,7 @@ export default function Thesis() {
           <motion.div
             aria-hidden
             className="absolute left-0 right-0 top-[3px] h-px origin-left bg-accent/40"
-            initial={reduce ? { scaleX: 1 } : { scaleX: 0 }}
+            initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true, amount: 0.5 }}
             transition={reduce ? { duration: 0 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
@@ -122,12 +124,13 @@ export default function Thesis() {
           <motion.ol
             className="relative grid grid-cols-4 gap-y-10 md:grid-cols-8"
             variants={nodeGroup}
-            initial={reduce ? "show" : "hidden"}
+            custom={reduce}
+            initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.4 }}
           >
             {phases.map((p, i) => (
-              <motion.li key={p.n} className="pr-4" variants={nodeItem}>
+              <motion.li key={p.n} className="pr-4" variants={nodeItem} custom={reduce}>
                 <span
                   aria-hidden
                   className="block h-[7px] w-[7px] rounded-full"

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import Figure from "@/components/ui/Figure";
-import { figureDraw, spring } from "@/lib/motion";
+import { figureDraw, instant, spring } from "@/lib/motion";
 
 const links = [
   { label: "GitHub", value: "github.com/Dexterity-PA", href: "https://github.com/Dexterity-PA" },
@@ -16,19 +16,19 @@ const links = [
 
 const listV: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+  show: (r: boolean) => ({ transition: { staggerChildren: r ? 0 : 0.07, delayChildren: r ? 0 : 0.05 } }),
 };
 const itemV: Variants = {
   hidden: { opacity: 0, x: 16 },
-  show: { opacity: 1, x: 0, transition: spring },
+  show: (r: boolean) => ({ opacity: 1, x: 0, transition: r ? instant : spring }),
 };
 const nodeV: Variants = {
   hidden: { opacity: 0, scale: 0 },
-  show: { opacity: 1, scale: 1, transition: spring },
+  show: (r: boolean) => ({ opacity: 1, scale: 1, transition: r ? instant : spring }),
 };
 
 // Self-exciting cascade: one seed tick branching into offspring events.
-function EventTree() {
+function EventTree({ reduce }: { reduce: boolean }) {
   const edges = [
     "M120 150 L70 104",
     "M120 150 L172 104",
@@ -58,6 +58,7 @@ function EventTree() {
           strokeWidth={1}
           strokeLinecap="round"
           variants={figureDraw}
+          custom={reduce}
         />
       ))}
       {nodes.map(([cx, cy, seed], i) => (
@@ -68,6 +69,7 @@ function EventTree() {
           r={seed ? 3.5 : 2}
           fill={seed ? "#4ade80" : "#5c6166"}
           variants={nodeV}
+          custom={reduce}
           style={{ transformBox: "fill-box", transformOrigin: "center" }}
         />
       ))}
@@ -93,13 +95,14 @@ export default function AboutSection() {
         <div className="order-1 flex flex-col gap-10 md:order-none md:col-span-5 md:col-start-8">
           <motion.ul
             className="flex flex-col"
-            initial={reduce ? "show" : "hidden"}
+            custom={!!reduce}
+            initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.4 }}
             variants={listV}
           >
             {links.map((l) => (
-              <motion.li key={l.label} variants={reduce ? undefined : itemV}>
+              <motion.li key={l.label} variants={itemV} custom={!!reduce}>
                 <a
                   href={l.href}
                   target={l.href.startsWith("http") ? "_blank" : undefined}
@@ -126,7 +129,7 @@ export default function AboutSection() {
 
           <Figure index={0.3} caption="self-exciting cascade from one tick" drift={28}>
             <div className="h-44 px-6 py-5">
-              <EventTree />
+              <EventTree reduce={!!reduce} />
             </div>
           </Figure>
         </div>
