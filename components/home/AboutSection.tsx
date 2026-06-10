@@ -80,7 +80,7 @@ export default function AboutSection() {
   return (
     <section id="about" className="section-pad">
       <p className="mb-12 font-mono text-12 uppercase tracking-label text-text-3">
-        0.2 / About
+        0.3 / About
       </p>
       <div className="grid gap-x-8 gap-y-14 md:grid-cols-12">
         <p className="two-tone order-2 text-balance text-28 md:order-none md:col-span-6 md:text-38">
@@ -124,7 +124,7 @@ export default function AboutSection() {
             ))}
           </motion.ul>
 
-          <Figure index={0.2} caption="self-exciting cascade from one tick" drift={28}>
+          <Figure index={0.3} caption="self-exciting cascade from one tick" drift={28}>
             <div className="h-44 px-6 py-5">
               <EventTree />
             </div>
