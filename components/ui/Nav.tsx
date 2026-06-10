@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useState } from "react";
 import { spring } from "@/lib/motion";
@@ -11,7 +12,16 @@ const links = [
   { label: "GitHub", href: "https://github.com/Dexterity-PA" },
 ];
 
+const quantlabLinks = [
+  { label: "Model", href: "#model" },
+  { label: "Math", href: "#math" },
+  { label: "Results", href: "#results" },
+  { label: "Validation", href: "#validation" },
+  { label: "Thesis", href: "#thesis" },
+];
+
 export default function Nav() {
+  const pathname = usePathname();
   const reduce = useReducedMotion();
   const { scrollY } = useScroll();
   const [hidden, setHidden] = useState(false);
@@ -38,8 +48,8 @@ export default function Nav() {
         >
           Praneeth Annapureddy
         </Link>
-        <div className="flex items-center gap-8">
-          {links.map((l) => (
+        <div className="flex items-center gap-4 md:gap-8">
+          {(pathname?.startsWith("/quantlab") ? quantlabLinks : links).map((l) => (
             <Link
               key={l.label}
               href={l.href}
