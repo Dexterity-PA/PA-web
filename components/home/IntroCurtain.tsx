@@ -3,17 +3,21 @@
 import { animate, motion, useMotionValue } from "motion/react";
 import type { MotionValue } from "motion/react";
 import { useEffect } from "react";
-import { MONO_A, MONO_P } from "./cascade";
 
-// Beat 2 (solidify) → Beat 3 (part), controlled by the orchestrator.
-// Mounts at the convergence moment: two black panels fade up over the canvas
-// swarm (black-on-black, so only the change reads) while the monogram strokes
-// draw in over the landed dots — the points fusing into letters. When `parting`
-// flips true the panels slide out, P on the left, A on the right, revealing the
+// Beat 1 (monogram) → Beat 2 (part), controlled by the orchestrator. The intro
+// opens here: two solid black panels carry a split "PA" monogram whose strokes
+// draw in (figureDraw) over ~900ms on the black, hold a beat, then — when
+// `parting` flips true — slide out, P on the left, A on the right, revealing the
 // backdrop arriving behind.
 
-// Fast, monotonic stroke draw — figureDraw look without the slow settle.
-const drawTransition = { type: "spring", duration: 0.52, bounce: 0 } as const;
+// "PA" as single-stroke letterforms, viewBox 0 0 120 64. The gap between P and A
+// straddles the viewBox center (x=60) so a split down the middle parts the
+// monogram cleanly: each panel clips a full-viewport-centered copy.
+const MONO_P = "M12 60 L12 4 L38 4 Q50 4 50 17 Q50 30 38 30 L12 30";
+const MONO_A = "M70 60 L90 4 L110 60 M77 41 L103 41";
+
+// Slow, monotonic stroke draw — figureDraw feel, no overshoot.
+const drawTransition = { type: "spring", duration: 0.9, bounce: 0 } as const;
 const partSpring = { type: "spring", stiffness: 210, damping: 30 } as const;
 
 function Monogram({ draw }: { draw: MotionValue<number> }) {
@@ -52,12 +56,15 @@ export default function IntroCurtain({ parting }: { parting: boolean }) {
   const edge = "absolute inset-y-0 w-px bg-white/[0.12] transition-opacity duration-500";
 
   return (
-    <div aria-hidden className="intro-curtain pointer-events-none fixed inset-0 z-[55] motion-reduce:hidden">
+    <div
+      aria-hidden
+      className="intro-curtain pointer-events-none fixed inset-0 z-[55] motion-reduce:hidden"
+    >
       <motion.div
         className={`${panel} left-0`}
-        initial={{ x: 0, opacity: 0 }}
-        animate={{ x: parting ? "-100%" : 0, opacity: 1 }}
-        transition={{ x: partSpring, opacity: { duration: 0.2, ease: "easeOut" } }}
+        initial={{ x: 0 }}
+        animate={{ x: parting ? "-100%" : 0 }}
+        transition={partSpring}
       >
         <div className={`${inner} left-0`}>
           <Monogram draw={draw} />
@@ -67,9 +74,9 @@ export default function IntroCurtain({ parting }: { parting: boolean }) {
 
       <motion.div
         className={`${panel} right-0`}
-        initial={{ x: 0, opacity: 0 }}
-        animate={{ x: parting ? "100%" : 0, opacity: 1 }}
-        transition={{ x: partSpring, opacity: { duration: 0.2, ease: "easeOut" } }}
+        initial={{ x: 0 }}
+        animate={{ x: parting ? "100%" : 0 }}
+        transition={partSpring}
       >
         <div className={`${inner} right-0`}>
           <Monogram draw={draw} />
