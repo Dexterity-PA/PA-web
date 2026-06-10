@@ -1,8 +1,11 @@
+import { introActive, introSignal } from "./introBus";
+
 const VERT = `attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}`;
 
 const FRAG = `precision mediump float;
 uniform vec2 u_res;
 uniform float u_t;
+uniform float u_in;
 const vec3 BG=vec3(0.020,0.024,0.027);
 const vec3 GREEN=vec3(0.290,0.870,0.502);
 const vec3 BLUE=vec3(0.220,0.305,0.430);
@@ -18,10 +21,11 @@ void main(){
   vec2 c2=vec2(asp*0.72+0.12*cos(t*0.50),0.62+0.10*sin(t*0.60));
   vec2 c3=vec2(asp*0.50+0.14*sin(t*0.40+1.7),0.20+0.09*cos(t*0.55+2.0));
   vec2 c4=vec2(asp*0.86+0.10*sin(t*0.80+3.1),0.32+0.07*cos(t*0.70+1.1));
-  col+=GREEN*blob(q,c1,0.45)*0.10;
-  col+=BLUE *blob(q,c2,0.58)*0.22;
-  col+=SLATE*blob(q,c3,0.52)*0.30;
-  col+=BLUE *blob(q,c4,0.40)*0.14;
+  vec3 field=GREEN*blob(q,c1,0.45)*0.10
+            +BLUE *blob(q,c2,0.58)*0.22
+            +SLATE*blob(q,c3,0.52)*0.30
+            +BLUE *blob(q,c4,0.40)*0.14;
+  col+=field*u_in;
   float vig=smoothstep(1.30,0.20,distance(uv,vec2(0.5)));
   col*=mix(0.86,1.0,vig);
   gl_FragColor=vec4(col,1.0);
@@ -79,6 +83,11 @@ export function startShader(canvas: HTMLCanvasElement, opts: Opts): () => void {
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const uRes = gl.getUniformLocation(prog, "u_res");
   const uT = gl.getUniformLocation(prog, "u_t");
+  const uIn = gl.getUniformLocation(prog, "u_in");
+  // First visit: the field blooms up from black on the intro's bloom signal.
+  // Otherwise it is simply at full rest.
+  const active = introActive();
+  gl.uniform1f(uIn, active ? 0 : 1);
 
   let w = 0;
   let h = 0;
@@ -111,7 +120,9 @@ export function startShader(canvas: HTMLCanvasElement, opts: Opts): () => void {
     frames += 1;
     const elapsed = now - probe;
     if (elapsed >= 1100) {
-      if (frames / (elapsed / 1000) < 50 && !slow) {
+      // Never drop the field mid-intro — the bloom needs it. The probe resumes
+      // policing once the reveal has rested.
+      if (frames / (elapsed / 1000) < 50 && !slow && !(active && introSignal.bloom < 1)) {
         slow = true;
         stop();
         opts.onSlow();
@@ -120,6 +131,7 @@ export function startShader(canvas: HTMLCanvasElement, opts: Opts): () => void {
       probe = now;
       frames = 0;
     }
+    if (active) gl.uniform1f(uIn, introSignal.bloom);
     gl.uniform1f(uT, (now - t0) / 1000);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };

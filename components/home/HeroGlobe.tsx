@@ -11,6 +11,7 @@ import {
   WebGLRenderer,
 } from "three";
 import { coastlineGeometry, graticuleGeometry } from "./globe/geometry";
+import { introActive, introSignal } from "./introBus";
 
 // 90s per revolution.
 const SPIN = (Math.PI * 2) / 90;
@@ -20,6 +21,11 @@ const TILT_Z = -0.16;
 // Half-extent of the ortho frustum; >1 leaves a hair of margin around the sphere.
 const HALF = 1.04;
 const DPR_CAP = 2;
+// Arrival: during the first-visit intro the planet eases in from this zoom (small,
+// distant) to 1 (resting) while its hairlines bloom up from nothing.
+const DISTANT_ZOOM = 0.52;
+const BASE_GRAT = 0.1;
+const BASE_COAST = 0.085;
 
 type Props = {
   reduce: boolean;
@@ -72,16 +78,22 @@ export default function HeroGlobe({ reduce, onReady, onUnsupported }: Props) {
     // No fill, no depth — a transparent wireframe; both hemispheres' hairlines
     // read at once. White, 8–10% so it stays atmosphere, never subject.
     const white = new Color(0xffffff);
-    const grat = new LineSegments(
-      graticuleGeometry(),
-      new LineBasicMaterial({ color: white, transparent: true, opacity: 0.1, depthWrite: false }),
-    );
-    const coast = new LineSegments(
-      coastlineGeometry(),
-      new LineBasicMaterial({ color: white, transparent: true, opacity: 0.085, depthWrite: false }),
-    );
+    const gratMat = new LineBasicMaterial({ color: white, transparent: true, opacity: BASE_GRAT, depthWrite: false });
+    const coastMat = new LineBasicMaterial({ color: white, transparent: true, opacity: BASE_COAST, depthWrite: false });
+    const grat = new LineSegments(graticuleGeometry(), gratMat);
+    const coast = new LineSegments(coastlineGeometry(), coastMat);
     spin.add(grat);
     spin.add(coast);
+
+    // First visit: start dark and distant; the intro's reveal signal eases us in.
+    const active = introActive();
+    if (active) {
+      gratMat.opacity = 0;
+      coastMat.opacity = 0;
+      camera.zoom = DISTANT_ZOOM;
+      camera.updateProjectionMatrix();
+    }
+    let lastR = active ? 0 : 1;
 
     const draw = () => renderer.render(scene, camera);
 
@@ -116,6 +128,16 @@ export default function HeroGlobe({ reduce, onReady, onUnsupported }: Props) {
       const dt = lastNow ? (now - lastNow) / 1000 : 0;
       lastNow = now;
       spin.rotation.y += dt * SPIN;
+      if (active) {
+        const r = introSignal.reveal;
+        if (r !== lastR) {
+          camera.zoom = DISTANT_ZOOM + (1 - DISTANT_ZOOM) * r;
+          camera.updateProjectionMatrix();
+          gratMat.opacity = BASE_GRAT * r;
+          coastMat.opacity = BASE_COAST * r;
+          lastR = r;
+        }
+      }
       draw();
     };
     const start = () => {
