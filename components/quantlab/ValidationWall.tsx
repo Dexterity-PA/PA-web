@@ -25,6 +25,7 @@ export default function ValidationWall() {
   return (
     <section id="validation" className="mx-auto max-w-content px-6 section-pad">
       <SectionHeader
+        className="md:[&>h2]:row-span-2"
         index={0.4}
         lead="The model must survive"
         rest="this."

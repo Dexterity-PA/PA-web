@@ -23,7 +23,7 @@ const phases = [
   { n: "06", name: "Selection", detail: "holdout, AIC" },
   { n: "07", name: "Findings", detail: "residual memory" },
 ];
-const DONE_THROUGH = 3; // "complete through validation"
+const DONE_THROUGH = phases.length - 1; // all phases 00–07 complete
 
 const headlineGroup = {
   hidden: {},
@@ -107,7 +107,7 @@ export default function Thesis() {
         <div className="mb-10 flex items-baseline justify-center gap-3">
           <span className="fig-label">FIG 0.5</span>
           <span className="font-mono text-12 uppercase tracking-label text-text-3">
-            Roadmap · complete through validation
+            Roadmap · all phases complete
           </span>
         </div>
         <div className="relative">

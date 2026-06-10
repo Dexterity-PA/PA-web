@@ -199,7 +199,7 @@ export default function MathScroll() {
         );
         tl.to({}, { duration: 0.6 });
         if (i < stepEls.length - 1) {
-          tl.to(el, { scale: 0.96, autoAlpha: 0.12, y: -18, duration: 0.4, ease: "power1.in" });
+          tl.to(el, { scale: 0.96, autoAlpha: 0, y: -18, duration: 0.4, ease: "power1.in" });
         }
       });
 
@@ -216,7 +216,7 @@ export default function MathScroll() {
   if (!pinned) {
     return (
       <section id="math" className="mx-auto max-w-content px-6 section-pad">
-        <SectionHeader {...HEADER} />
+        <SectionHeader {...HEADER} className="md:[&>h2]:row-span-2" />
         <div className="mt-16 space-y-20 md:mt-24">
           {steps.map((s) => (
             <StepBlock key={s.label} step={s} animated={false} />
@@ -229,7 +229,7 @@ export default function MathScroll() {
   return (
     <section id="math">
       <div className="mx-auto max-w-content px-6 pb-4 pt-24 md:pt-32">
-        <SectionHeader {...HEADER} />
+        <SectionHeader {...HEADER} className="md:[&>h2]:row-span-2" />
       </div>
       <div ref={stage} className="relative flex h-svh items-center overflow-hidden">
         <div className="pointer-events-none absolute left-6 top-1/2 z-10 h-[55svh] -translate-y-1/2 md:left-12">

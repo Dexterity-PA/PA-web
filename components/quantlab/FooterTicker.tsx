@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { spring } from "@/lib/motion";
 
 type Trade = { id: number; price: number; qty: number; sell: boolean };
@@ -24,6 +24,10 @@ const fallback: Trade[] = [
 const WS_URL = "wss://data-stream.binance.vision/ws/btcusdt@aggTrade";
 const FLUSH_MS = 600;
 const KEEP = 12;
+
+// Size with 3–4 significant figures so small aggTrades read as their real size
+// instead of collapsing to 0.000 under a fixed 3-decimal format.
+const fmtQty = (q: number) => q.toLocaleString("en-US", { maximumSignificantDigits: 4 });
 
 export default function FooterTicker() {
   const reduce = useReducedMotion();
@@ -75,6 +79,17 @@ export default function FooterTicker() {
     };
   }, [reduce]);
 
+  // Trades render newest-first, so each trade's predecessor is the next entry.
+  // Direction is the sign of its price change; equal prints carry the last move.
+  const dirs = useMemo(() => {
+    const out = new Array(trades.length).fill(1);
+    for (let i = trades.length - 2; i >= 0; i--) {
+      const d = trades[i].price - trades[i + 1].price;
+      out[i] = d > 0 ? 1 : d < 0 ? -1 : out[i + 1];
+    }
+    return out;
+  }, [trades]);
+
   return (
     <div
       ref={ref}
@@ -83,19 +98,22 @@ export default function FooterTicker() {
       <span className="font-mono text-12 uppercase tracking-label text-text-3">
         BTC-USDT
       </span>
-      {trades.map((t) => (
-        <motion.span
-          key={t.id}
-          className="font-mono text-12"
-          style={{ color: t.sell ? "var(--sell)" : "var(--accent)" }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={reduce ? { duration: 0 } : spring}
-        >
-          {t.sell ? "▼" : "▲"} {t.price.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
-          · {t.qty.toFixed(3)}
-        </motion.span>
-      ))}
+      {trades.map((t, i) => {
+        const up = dirs[i] >= 0;
+        return (
+          <motion.span
+            key={t.id}
+            className="font-mono text-12"
+            style={{ color: up ? "var(--accent)" : "var(--sell)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={reduce ? { duration: 0 } : spring}
+          >
+            {up ? "▲" : "▼"} {t.price.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
+            · {fmtQty(t.qty)}
+          </motion.span>
+        );
+      })}
     </div>
   );
 }
