@@ -23,8 +23,9 @@ const REST = 3;
 const FADE = 4;
 const DONE = 5;
 
-const CH = 35;
-const PAUSE = 130;
+const CH = 55;
+const JITTER = 15;
+const PAUSE = 350;
 const strikeSpring = { type: "spring", stiffness: 460, damping: 18, mass: 1 } as const;
 const sentenceWords = HERO_SENTENCE.split(" ");
 
@@ -32,7 +33,7 @@ function Cursor() {
   return (
     <motion.span
       aria-hidden
-      className="inline-block h-[0.78em] w-[0.5ch] -translate-y-[0.02em] bg-accent align-text-bottom"
+      className="ml-[0.06em] inline-block h-[1em] w-[0.5ch] bg-accent align-baseline"
       animate={{ opacity: [1, 1, 0, 0] }}
       transition={{ duration: 1, times: [0, 0.5, 0.5, 1], repeat: Infinity, ease: "linear" }}
     />
@@ -67,20 +68,20 @@ export default function IntroOverlay() {
         setChars(0);
       });
       for (let c = 1; c <= w.length; c++) {
-        clock += CH;
+        clock += CH + (Math.random() * 2 - 1) * JITTER;
         const cc = c;
         at(clock, () => setChars(cc));
       }
       clock += PAUSE;
     });
     at(clock, () => setPhase(BEAT));
-    clock += 700;
+    clock += 400;
     at(clock, () => setPhase(STRIKE));
-    clock += 680;
+    clock += 480;
     at(clock, () => setPhase(REST));
-    clock += 950;
+    clock += 560;
     at(clock, () => setPhase(FADE));
-    clock += 700;
+    clock += 560;
     at(clock, () => setPhase(DONE));
 
     return () => timers.forEach(clearTimeout);
@@ -117,7 +118,7 @@ export default function IntroOverlay() {
       className="intro-overlay fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-bg-0 px-6 motion-reduce:hidden"
       initial={{ opacity: 1 }}
       animate={{ opacity: fading ? 0 : 1 }}
-      transition={{ duration: 0.66, ease: "easeInOut" }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
     >
       <div className="flex flex-col items-center text-center">
         <span className={labelClass}>{HERO_LABEL}</span>
