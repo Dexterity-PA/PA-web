@@ -241,6 +241,7 @@ export default function ResultsGrid() {
   return (
     <section id="results" className="mx-auto max-w-content px-6 section-pad">
       <SectionHeader
+        className="md:[&>h2]:row-span-2"
         index={0.3}
         lead="Empirical"
         rest="results."

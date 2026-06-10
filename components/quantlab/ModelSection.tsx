@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
+import { motion, useInView, useReducedMotion } from "motion/react";
+import { useRef, useState } from "react";
 import Card from "@/components/ui/Card";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeader from "@/components/ui/SectionHeader";
@@ -60,16 +60,22 @@ export default function ModelSection() {
     onBlur: () => setTerm(null),
   });
 
+  // Drive the stroke draw-in from one container-level observer on the <svg> root.
+  // IntersectionObserver on individual SVG <path> elements (whileInView per path)
+  // is unreliable outside Chromium, so the kernel could stay undrawn; observing the
+  // real svg element instead fires reliably and draws both paths together.
+  const svgRef = useRef<SVGSVGElement>(null);
+  const drawn = useInView(svgRef, { once: true, amount: 0.4 });
   const drawProps = {
     variants: figureDraw,
     initial: reduce ? "show" : "hidden",
-    whileInView: "show",
-    viewport: { once: true, amount: 0.5 },
+    animate: reduce || drawn ? "show" : "hidden",
   } as const;
 
   return (
     <section id="model" className="mx-auto max-w-content px-6 section-pad">
       <SectionHeader
+        className="md:[&>h2]:row-span-2"
         index={0.1}
         lead="Self-excitation,"
         rest="made visible."
@@ -145,6 +151,7 @@ export default function ModelSection() {
                 <span className="text-12 text-text-3">kernel geometry</span>
               </div>
               <svg
+                ref={svgRef}
                 viewBox="0 0 320 132"
                 className="mt-4 w-full"
                 aria-label="Diagram of baseline, self-excitation kernel, and cross-excitation"
