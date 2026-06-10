@@ -3,7 +3,6 @@
 import { animate, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { armIntro, introSignal } from "./introBus";
-import IntroCascade from "./IntroCascade";
 import IntroCurtain from "./IntroCurtain";
 import IntroTyping from "./IntroTyping";
 
@@ -13,25 +12,20 @@ import IntroTyping from "./IntroTyping";
 // keeps its early LCP — until PART, when it is hidden under the still-closed
 // curtain; the intro then carries the foreground until the handoff at DONE.
 
-const CASCADE = 0;
-const CONVERGE = 1;
-const SOLIDIFY = 2;
-const PART = 3;
-const TYPING = 4;
-const DONE = 5;
-type Phase = 0 | 1 | 2 | 3 | 4 | 5;
+const DRAW = 0; // monogram strokes draw in on black, then hold
+const PART = 1; // panels part; globe arrives, field blooms
+const TYPING = 2; // headline types over the revealed backdrop, then settles
+const DONE = 3;
+type Phase = 0 | 1 | 2 | 3;
 
-const CASCADE_MS = 1850;
-const CONVERGE_MS = 820;
-const SOLIDIFY_MS = 700;
+const DRAW_MS = 1200; // ~900ms figureDraw + ~300ms hold
 const PART_MS = 880; // part begins → typing mounts (curtain still sliding out)
 
-const SEED = 0x9e3779b1;
 const revealEase = [0.22, 1, 0.36, 1] as const;
 
 export default function HeroIntro() {
   const reduce = useReducedMotion();
-  const [phase, setPhase] = useState<Phase>(CASCADE);
+  const [phase, setPhase] = useState<Phase>(DRAW);
   const anims = useRef<{ stop: () => void }[]>([]);
   const skippedRef = useRef(false);
 
@@ -94,12 +88,7 @@ export default function HeroIntro() {
     } catch {}
     armIntro();
 
-    let t = CASCADE_MS;
-    at(t, () => setPhase(CONVERGE));
-    t += CONVERGE_MS;
-    at(t, () => setPhase(SOLIDIFY));
-    t += SOLIDIFY_MS;
-    at(t, () => {
+    at(DRAW_MS, () => {
       // Hide the (still-covered) server foreground a frame before the panels move,
       // then part: the globe arrives and the field blooms as the seam opens.
       html.setAttribute("data-intro-running", "");
@@ -107,8 +96,7 @@ export default function HeroIntro() {
       drive(0, 1, 1.05, (v) => (introSignal.reveal = v), revealEase);
       drive(0, 0.82, 1.3, (v) => (introSignal.bloom = v));
     });
-    t += PART_MS;
-    at(t, () => setPhase(TYPING));
+    at(DRAW_MS + PART_MS, () => setPhase(TYPING));
 
     const onKey = () => skip();
     window.addEventListener("keydown", onKey);
@@ -121,18 +109,9 @@ export default function HeroIntro() {
 
   if (phase === DONE) return null;
 
-  const cascadeMode =
-    phase === CASCADE ? "cascade" : phase === CONVERGE ? "converge" : "fade";
-
   return (
     <>
-      {(phase === CASCADE || phase === CONVERGE || phase === SOLIDIFY) && (
-        <IntroCascade seed={SEED} mode={cascadeMode} />
-      )}
-
-      {(phase === SOLIDIFY || phase === PART) && (
-        <IntroCurtain parting={phase === PART} />
-      )}
+      {(phase === DRAW || phase === PART) && <IntroCurtain parting={phase === PART} />}
 
       {phase === TYPING && (
         <IntroTyping

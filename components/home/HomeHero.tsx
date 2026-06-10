@@ -23,7 +23,7 @@ const skipScript =
 // stays painted for early LCP, then is hidden under the closed curtain the frame
 // before it parts, and restored at the handoff.
 const introStyle =
-  "[data-intro-skip] .intro-cascade,[data-intro-skip] .intro-curtain,[data-intro-skip] .intro-typing,[data-intro-skip] .intro-skip{display:none}" +
+  "[data-intro-skip] .intro-curtain,[data-intro-skip] .intro-typing,[data-intro-skip] .intro-skip{display:none}" +
   "[data-intro-running] .hero-rest{opacity:0}";
 
 export default function HomeHero() {
