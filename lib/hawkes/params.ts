@@ -1,13 +1,14 @@
-export const MU = [0.4, 0.38] as const;
-export const BETA = [0.6, 0.5] as const;
+export const MU = [0.42, 0.4] as const;
+export const BETA = [0.62, 0.52] as const;
 export const BRANCHING = [
-  [0.45, 0.2],
-  [0.2, 0.45],
+  [0.6, 0.02],
+  [0.038, 0.6],
 ] as const;
 export const ALPHA = [
   [BRANCHING[0][0] * BETA[0], BRANCHING[0][1] * BETA[1]],
   [BRANCHING[1][0] * BETA[0], BRANCHING[1][1] * BETA[1]],
 ] as const;
+export const BRANCHING_RATIO = 0.62;
 export const LAMBDA_CAP = 12;
 export const WINDOW = 20;
 export const LOOKAHEAD = 2;

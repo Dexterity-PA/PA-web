@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import MagneticButton from "@/components/ui/MagneticButton";
 import StaticPointProcess from "./StaticPointProcess";
 import {
   ALPHA,
@@ -54,11 +53,8 @@ function glowSprite(core: string, edge: string) {
 
 export default function PointProcessHero({ variant = "full", className = "" }: Props) {
   const [live, setLive] = useState(false);
-  const wrapRef = useRef<HTMLElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const lbRef = useRef<HTMLSpanElement>(null);
-  const lsRef = useRef<HTMLSpanElement>(null);
-  const nRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const rm = matchMedia("(prefers-reduced-motion: reduce)");
@@ -66,9 +62,17 @@ export default function PointProcessHero({ variant = "full", className = "" }: P
       typeof Worker !== "undefined" &&
       !!document.createElement("canvas").getContext("2d");
     const apply = () => setLive(ok && !rm.matches);
-    apply();
+    const ric =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(apply, { timeout: 1500 })
+        : window.setTimeout(apply, 300);
     rm.addEventListener("change", apply);
-    return () => rm.removeEventListener("change", apply);
+    return () => {
+      rm.removeEventListener("change", apply);
+      if (typeof window.cancelIdleCallback === "function")
+        window.cancelIdleCallback(ric as number);
+      else clearTimeout(ric);
+    };
   }, []);
 
   useEffect(() => {
@@ -77,6 +81,9 @@ export default function PointProcessHero({ variant = "full", className = "" }: P
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!wrap || !canvas || !ctx) return;
+    const readB = document.getElementById("lam-buy");
+    const readS = document.getElementById("lam-sell");
+    const readN = document.getElementById("lam-n");
 
     const cfg =
       variant === "mini" ||
@@ -409,9 +416,9 @@ export default function PointProcessHero({ variant = "full", className = "" }: P
       drawGlows(injT, injMark, injSide, injDrawTail, injHead, INJ_MASK, t0);
       if (now - lastRead > 100) {
         lastRead = now;
-        if (lbRef.current) lbRef.current.textContent = lamB[k & LAM_MASK].toFixed(2);
-        if (lsRef.current) lsRef.current.textContent = lamS[k & LAM_MASK].toFixed(2);
-        if (nRef.current) nRef.current.textContent = n.toLocaleString("en-US");
+        if (readB) readB.textContent = lamB[k & LAM_MASK].toFixed(2);
+        if (readS) readS.textContent = lamS[k & LAM_MASK].toFixed(2);
+        if (readN) readN.textContent = n.toLocaleString("en-US");
       }
       firstDraw = true;
     };
@@ -487,49 +494,10 @@ export default function PointProcessHero({ variant = "full", className = "" }: P
     };
   }, [live, variant]);
 
-  const full = variant === "full";
   return (
-    <section
-      ref={wrapRef}
-      className={`relative isolate overflow-hidden bg-bg-0 ${className}`}
-      aria-label={full ? "Live bivariate Hawkes point process of BTC-USDT order flow" : undefined}
-    >
+    <div ref={wrapRef} className={`isolate overflow-hidden bg-bg-0 ${className}`}>
       <StaticPointProcess className="absolute inset-0 h-full w-full" />
       {live && <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-hidden />}
-      {full && (
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex w-full flex-col justify-center border-r border-border bg-glass px-6 backdrop-blur-[20px] md:w-[45%] md:px-12">
-          <p className="font-mono text-12 uppercase tracking-label text-text-3">
-            Market microstructure / point processes
-          </p>
-          <h1 className="mt-6 max-w-xl text-50 font-semibold text-text-1 md:text-90">
-            Order flow, modeled.
-          </h1>
-          <p className="mt-5 max-w-md text-16 text-text-2">
-            A bivariate Hawkes process fit to BTC-USDT market orders — every
-            tick you see excites the next.
-          </p>
-          <div className="pointer-events-auto mt-9 flex flex-wrap gap-3">
-            <MagneticButton href="#model">Read the research</MagneticButton>
-            <MagneticButton href="https://github.com/Dexterity-PA/PA-web" variant="ghost">
-              GitHub
-            </MagneticButton>
-          </div>
-          <div
-            className="absolute bottom-6 left-6 flex gap-5 font-mono text-12 tracking-label text-text-3 md:left-12"
-            aria-hidden
-          >
-            <span>
-              λ+ <span ref={lbRef} className="text-accent">—</span>
-            </span>
-            <span>
-              λ− <span ref={lsRef} className="text-sell">—</span>
-            </span>
-            <span>
-              n <span ref={nRef}>—</span>
-            </span>
-          </div>
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

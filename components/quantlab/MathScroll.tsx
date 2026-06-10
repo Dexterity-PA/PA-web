@@ -2,23 +2,13 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { onLenis } from "@/components/ui/LenisProvider";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const REDUCE_MQ = "(prefers-reduced-motion: reduce)";
-const subscribeReduce = (cb: () => void) => {
-  const mq = window.matchMedia(REDUCE_MQ);
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
-};
-const useReduced = () =>
-  useSyncExternalStore(
-    subscribeReduce,
-    () => window.matchMedia(REDUCE_MQ).matches,
-    () => false,
-  );
+const CAN_PIN_MQ =
+  "(prefers-reduced-motion: reduce), (max-width: 767px), (pointer: coarse)";
 
 type Step = {
   label: string;
@@ -54,7 +44,7 @@ const steps: Step[] = [
         + Σ<sub>tₖ∈N⁻</sub> α₊₋ e<sup>−β⁻(t−tₖ)</sup>
       </span>,
     ],
-    note: "β is source-only — the parent's side sets the decay. ordered: α₊₊ > α₊₋",
+    note: "β is source-only: the parent's side sets the decay. ordered α₊₊ > α₊₋",
   },
   {
     label: "03 · log-likelihood, O(N)",
@@ -72,7 +62,7 @@ const steps: Step[] = [
         𝟙[mᵢ₋₁ = b])
       </span>,
     ],
-    note: "the kernel sum telescopes — one recursion, one pass over N events, never N²",
+    note: "the kernel sum telescopes: one recursion, one pass over N events, never N²",
   },
   {
     label: "04 · analytic gradient",
@@ -89,7 +79,7 @@ const steps: Step[] = [
         ∂ℓ/∂μ, ∂ℓ/∂β closed-form alike
       </span>,
     ],
-    note: "exact gradients into L-BFGS-B — no finite differences in the fit loop",
+    note: "exact gradients into L-BFGS-B, no finite differences in the fit loop",
   },
 ];
 
@@ -115,10 +105,17 @@ function StepBlock({ step, animated }: { step: Step; animated: boolean }) {
 
 export default function MathScroll() {
   const stage = useRef<HTMLDivElement>(null);
-  const reduced = useReduced();
+  const [pinned, setPinned] = useState(false);
 
   useEffect(() => {
-    if (reduced || window.matchMedia(REDUCE_MQ).matches) return;
+    const id = window.setTimeout(() => {
+      if (!window.matchMedia(CAN_PIN_MQ).matches) setPinned(true);
+    }, 0);
+    return () => clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (!pinned) return;
     let detach: (() => void) | undefined;
     const off = onLenis((lenis) => {
       lenis.on("scroll", ScrollTrigger.update);
@@ -163,9 +160,9 @@ export default function MathScroll() {
       off();
       detach?.();
     };
-  }, [reduced]);
+  }, [pinned]);
 
-  if (reduced) {
+  if (!pinned) {
     return (
       <section id="math" className="mx-auto max-w-content px-6 section-pad">
         <p className="font-mono text-12 uppercase tracking-label text-text-3">

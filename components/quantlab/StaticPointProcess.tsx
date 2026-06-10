@@ -35,7 +35,7 @@ export default function StaticPointProcess({ className = "" }: Props) {
       preserveAspectRatio="none"
       aria-hidden
     >
-      <style>{`@keyframes ppfade{from{opacity:0}}.ppfade{animation:ppfade .9s ease-out both}`}</style>
+      <style>{`@keyframes ppfade{from{opacity:0}}.ppfade{animation:ppfade .9s ease-out both}@media (prefers-reduced-motion:reduce){.ppfade{animation:none}}`}</style>
       <g className="ppfade">
         <rect x="0" y={AX - 0.5} width={W} height="1" fill="rgba(255,255,255,0.08)" />
         <polygon points={buyArea} fill="rgba(74,222,128,0.08)" />

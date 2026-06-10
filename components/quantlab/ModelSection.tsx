@@ -25,15 +25,15 @@ function lambdaPath() {
 const LAMBDA_D = lambdaPath();
 
 const captions: Record<Term, string> = {
-  mu: "μ⁺ — exogenous baseline arrival rate",
+  mu: "μ⁺: exogenous baseline arrival rate",
   self: "each buy lifts λ⁺ by α₊₊, decaying at β⁺",
   cross: "sell flow feeds back into λ⁺ through α₊₋",
 };
 
 const paragraphs = [
   "A bivariate Hawkes process is a counting process whose intensity is a function of its own history. Every market order momentarily raises the probability of the next one, and that excitement decays exponentially. Order flow arrives in clusters, not as the uniform drizzle a Poisson model assumes.",
-  "Aggressive flow begets aggressive flow. A marketable buy consumes liquidity, moves the quote, and trips the algorithms watching it — momentum ignition, stop cascades, queue reshuffling. In the data this shows up as a branching ratio far above zero: most market orders are children of earlier ones, not spontaneous arrivals.",
-  "The bivariate structure is the point. Buys excite sells and sells excite buys — market makers lean against flow, mean-reversion strategies fade it. The cross-excitation terms measure that coupling directly, and their asymmetry between sides is where the microstructure signal lives.",
+  "Aggressive flow begets aggressive flow. A marketable buy consumes liquidity, moves the quote, and trips the algorithms watching it: momentum ignition, stop cascades, queue reshuffling. In the data this shows up as a branching ratio far above zero. Most market orders are children of earlier ones, not spontaneous arrivals.",
+  "The bivariate structure is the point. Buys excite sells and sells excite buys. Market makers lean against flow, mean-reversion strategies fade it. The cross-excitation terms measure that coupling directly, and their asymmetry between sides is where the microstructure signal lives.",
 ];
 
 export default function ModelSection() {
