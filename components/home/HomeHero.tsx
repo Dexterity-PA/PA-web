@@ -1,4 +1,6 @@
 import HeroBackdrop from "./HeroBackdrop";
+import HeroGlobeLayer from "./HeroGlobeLayer";
+import IntroCurtain from "./IntroCurtain";
 import IntroOverlay from "./IntroOverlay";
 import PendingMark from "./PendingMark";
 import {
@@ -22,12 +24,14 @@ export default function HomeHero() {
     <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6">
       <style
         dangerouslySetInnerHTML={{
-          __html: "[data-intro-skip] .intro-overlay{display:none}",
+          __html:
+            "[data-intro-skip] .intro-overlay,[data-intro-skip] .intro-curtain{display:none}",
         }}
       />
       <script dangerouslySetInnerHTML={{ __html: skipScript }} />
 
       <HeroBackdrop className="absolute inset-0 z-0" />
+      <HeroGlobeLayer />
 
       <div className="relative z-10 flex flex-col items-center text-center">
         <span className={labelClass}>{HERO_LABEL}</span>
@@ -56,6 +60,7 @@ export default function HomeHero() {
       </div>
 
       <IntroOverlay />
+      <IntroCurtain />
 
       <div
         aria-hidden
