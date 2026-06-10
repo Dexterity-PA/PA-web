@@ -1,6 +1,7 @@
 import AboutSection from "@/components/home/AboutSection";
 import FeaturedQuantlab from "@/components/home/FeaturedQuantlab";
 import HomeHero from "@/components/home/HomeHero";
+import JourneySection from "@/components/home/JourneySection";
 import Ticker from "@/components/home/Ticker";
 import SectionHeader from "@/components/ui/SectionHeader";
 import SectionRule from "@/components/ui/SectionRule";
@@ -26,6 +27,10 @@ export default function Home() {
             <FeaturedQuantlab />
           </div>
         </section>
+
+        <SectionRule />
+
+        <JourneySection />
 
         <SectionRule />
 
